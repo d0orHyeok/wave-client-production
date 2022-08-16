@@ -1,0 +1,9 @@
+@font-face {
+  font-family: AppFontSpecial;
+  src: url('../assets/font/LeferiPointSpecialItalic.ttf');
+}
+
+@font-face {
+  font-family: AppFont;
+  src: url('../assets/font/EliceDigitalBaeum_Regular.ttf');
+}
