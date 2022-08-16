@@ -1,6 +1,5 @@
 const webpack = require('webpack')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 module.exports = {
   mode: 'production',
@@ -10,7 +9,6 @@ module.exports = {
       NODE_ENV: 'production',
       'process.env.name': JSON.stringify('Wave'),
     }),
-    // new BundleAnalyzerPlugin(),
     new CleanWebpackPlugin(),
   ],
 }

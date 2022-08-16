@@ -11,7 +11,7 @@
     "typescript"
   ],
   "author": "d0orhyeok <d0oR.hyeok@gmail.com>",
-  "proxy": "http://localhost:3000",
+  "proxy": "https://wave-nestjs.herokuapp.com/",
   "dependencies": {
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",

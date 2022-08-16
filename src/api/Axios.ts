@@ -5,8 +5,15 @@ const Axios: AxiosInstance = axios.create({
   baseURL:
     process.env.NODE_ENV === 'development'
       ? '/'
-      : `${process.env.REACT_APP_API_URL}`,
+      : 'https://wave-nestjs.herokuapp.com/',
   withCredentials: true,
+})
+
+Axios.interceptors.request.use((request) => {
+  if (process.env.NODE_ENV !== 'development') {
+    request.url = request.url?.replace('/api/', '/')
+  }
+  return request
 })
 
 Axios.defaults.paramsSerializer = (params) => {
