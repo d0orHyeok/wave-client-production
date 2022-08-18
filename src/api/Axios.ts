@@ -28,7 +28,7 @@ Axios.interceptors.response.use(
     const originalRequest = error.config
     if (error.response?.status === 401) {
       // 유저인증실패로 요청에 실패한경우
-      if (originalRequest.url === '/api/auth/refresh') {
+      if (originalRequest.url.indexOf('/auth/refresh') !== -1) {
         return Promise.reject(error)
       } else {
         // refreshToken을 통해 accessToken 요청
