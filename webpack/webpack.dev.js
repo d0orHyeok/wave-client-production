@@ -10,7 +10,7 @@ module.exports = {
     historyApiFallback: true,
     proxy: {
       '/api': {
-        target: 'https://wave-nestjs.herokuapp.com/',
+        target: 'http://localhost:3000/',
         changeOrigin: true,
         pathRewrite: { '^/api': '' },
       },
