@@ -1,5 +1,5 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import HomePage from '@pages/HomePage/HomePage'
 import RegisterPage from '@pages/RegisterPage/RegisterPage'
 import withUser from './authHOC'
@@ -23,6 +23,12 @@ import NewDetailPage from '@pages/ChartDetailPage/NewDetailPage'
 const userDetailPage = ['likes', 'following', 'followers', 'comments']
 
 const Router = () => {
+  const loacation = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [loacation.pathname])
+
   return (
     <Routes>
       <Route path="*" element={withUser(NotFoundPage, null)} />
