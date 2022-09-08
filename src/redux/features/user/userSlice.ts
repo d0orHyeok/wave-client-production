@@ -28,13 +28,13 @@ export const userSlice = createSlice({
     [userThunks.userAuth.fulfilled.type]: (state, action) => {
       state.isLogin = true
       state.userData = action.payload
+      state.update = Date.now()
     },
     [userThunks.userAuth.rejected.type]: (state) => {
       state.isLogin = false
       state.userData = undefined
     },
     [userThunks.userLogout.pending.type]: (state) => {
-      // 재발급 전에 기존의 accessToken을 폐기
       state.isLogin = false
       state.userData = undefined
     },
