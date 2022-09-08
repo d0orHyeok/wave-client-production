@@ -12,6 +12,10 @@ const Axios: AxiosInstance = axios.create({
 Axios.interceptors.request.use((request) => {
   if (process.env.NODE_ENV !== 'development') {
     request.url = request.url?.replace('/api/', '/')
+    const reqAuth = localStorage.getItem('wave_login') !== 'false'
+    if (!reqAuth && request.url?.indexOf('/auth/info') !== -1) {
+      return
+    }
   }
   return request
 })
@@ -28,18 +32,22 @@ Axios.interceptors.response.use(
     const originalRequest = error.config
     if (error.response?.status === 401) {
       // 유저인증실패로 요청에 실패한경우
-      if (originalRequest.url.indexOf('/auth/refresh') !== -1) {
+      const reqAuth = localStorage.getItem('wave_login') !== 'false'
+
+      if (originalRequest.url.indexOf('/auth/refresh') !== -1 || !reqAuth) {
         return Promise.reject(error)
       } else {
         // refreshToken을 통해 accessToken 요청
         try {
           const response = await Axios.post('/api/auth/refresh')
+          localStorage.setItem('wave_login', 'true')
           const { accessToken } = response.data
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           interceptWithAccessToken(accessToken)
           return axios(originalRequest)
         } catch (error) {
           // refreshToken을 통한 요청도 실패하면 그냥 실패
+          localStorage.setItem('wave_login', 'false')
           return Promise.reject(error)
         }
       }

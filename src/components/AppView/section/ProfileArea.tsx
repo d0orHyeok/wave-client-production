@@ -45,8 +45,9 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
     [handleClose, navigate]
   )
 
-  const handleClickLogout = useCallback(() => {
-    dispatch(userLogout())
+  const handleClickLogout = useCallback(async () => {
+    await dispatch(userLogout())
+    localStorage.setItem('wave_login', 'false')
     openAlert('로그아웃 되었습니다.', { severity: 'success' })
     handleClose()
     navigate('/')
