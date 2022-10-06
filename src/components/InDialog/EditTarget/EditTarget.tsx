@@ -26,12 +26,9 @@ import EditPlaylistData, {
   TypeOnChangeDataKey as PlaylistKey,
 } from './EditPlaylist/EditPlaylistData'
 import EditPlaylistTracks from './EditPlaylist/EditPlaylistTracks'
-import * as ModalStyle from '../common.style'
-import {
-  changePlaylistImage,
-  changePlaylistMusics,
-  updatePlaylistData,
-} from '@api/playlistApi'
+import { changePlaylistImage, updatePlaylistData } from '@api/playlistApi'
+import LoadingPage from '@components/Loading/LoadingPage'
+import { useNavigate } from 'react-router-dom'
 
 interface IMusicEditData {
   title?: string
@@ -66,11 +63,13 @@ interface EditTargetProps {
 
 const EditTarget = ({ target, setTarget, onClose }: EditTargetProps) => {
   const openAlert = useAlert()
+  const navigate = useNavigate()
 
   const musicBasicInfoRef = useRef<IMusicBasicInfoHandler>(null)
   const musiMetadataRef = useRef<IMusicMetadataHandler>(null)
 
   const [loading, setLoading] = useState(true)
+  const [saveLoading, setSaveLoading] = useState(false)
   const [navIndex, setNavIndex] = useState(0)
   const [navItems, setNavItems] = useState<string[]>([]) // 메뉴 탭 아이템
   const [metadata, setMetadata] = useState<IExtractMetadata | null>() // 음악파일의 메타데이터 정보
@@ -85,67 +84,71 @@ const EditTarget = ({ target, setTarget, onClose }: EditTargetProps) => {
     // 음악정보를 변경한다.
     try {
       const { cover, ...body } = musicEditData
-      const response = await updateMusicData(target.id, body)
-      const coverReq =
-        cover && typeof cover !== 'string'
-          ? await changeMusicCover(target.id, cover)
-          : null
-      const updatedMusic = coverReq ? coverReq.data : response.data
-      setTarget && setTarget(updatedMusic)
+      const response =
+        typeof cover !== 'string' && cover
+          ? await changeMusicCover(target.id, cover, body)
+          : await updateMusicData(target.id, body)
+
+      setTarget &&
+        setTarget((prevState: IMusic) => {
+          const user = prevState.user
+          const updateMusic: IMusic = response.data
+          return { ...updateMusic, user }
+        })
       openAlert('Track data has been changed', { severity: 'success' })
+      onClose()
     } catch (error: any) {
       console.error(error.response || error)
       openAlert('Fail to update track', { severity: 'error' })
-    } finally {
-      onClose()
     }
   }, [musicEditData, onClose, openAlert, setTarget, target.id])
 
   const updatePlaylist = useCallback(async () => {
     // 플레이리스트 정보를 변경한다.
     if ('name' in target) {
-      try {
-        const { image, ...body } = playlistEditData
-        const response = await updatePlaylistData(target.id, body)
-        const imageReq =
-          image && typeof image !== 'string'
-            ? await changePlaylistImage(target.id, image)
-            : null
-        const updatedPlaylist = imageReq ? imageReq.data : response.data
-        setTarget && setTarget(updatedPlaylist)
-        if (trackIndexes) {
-          const musicIds = trackIndexes.map((index) => target.musics[index].id)
-          const res = await changePlaylistMusics(target.id, musicIds)
-          const musics = res.data
-          setTarget((prevState: any) => {
-            return !updatedPlaylist
-              ? { ...prevState, musics }
-              : { ...updatedPlaylist, musics }
-          })
-        }
+      const { image, ...data } = playlistEditData
+      const body = !trackIndexes
+        ? data
+        : {
+            ...data,
+            musicIds: trackIndexes.map((index) => target.musics[index].id),
+          }
+      const response =
+        typeof image !== 'string' && image
+          ? await changePlaylistImage(target.id, image, body)
+          : await updatePlaylistData(target.id, body)
 
-        openAlert('Playlist data has been changed', { severity: 'success' })
-      } catch (error: any) {
-        console.error(error.response || error)
-        openAlert('Fail to update playlist', { severity: 'error' })
-      } finally {
-        onClose()
-      }
+      setTarget(response.data)
+      openAlert('Playlist data has been changed', { severity: 'success' })
     }
-  }, [onClose, openAlert, playlistEditData, setTarget, target, trackIndexes])
+  }, [openAlert, playlistEditData, setTarget, target, trackIndexes])
 
   const handleClickSave = useCallback(async () => {
     if (!changed) {
       return
     }
-    setLoading(true)
-    if ('title' in target) {
-      updateTrack()
-    } else {
-      updatePlaylist()
+    setSaveLoading(true)
+    const targetName = 'title' in target ? 'track' : 'playlist'
+    try {
+      targetName === 'track' ? await updateTrack() : await updatePlaylist()
+    } catch (error: any) {
+      console.error(error.response || error)
+      openAlert('Fail to update', { severity: 'error' })
     }
-    setLoading(false)
-  }, [changed, target, updateTrack, updatePlaylist])
+    setSaveLoading(false)
+    const firstPath = location.pathname.split('/')?.at(1)
+    if (firstPath !== 'track' && firstPath !== 'playlist')
+      navigate(`/profile/${target.userId}/${targetName}s`)
+    onClose()
+  }, [
+    changed,
+    target,
+    navigate,
+    onClose,
+    updateTrack,
+    updatePlaylist,
+    openAlert,
+  ])
 
   const handleChangeMusicData = useCallback(
     // 음악정보가 변경되었음을 확인하면 변경된 정보를 저장하고 같다면 해당 항목을 삭제한다.
@@ -222,7 +225,10 @@ const EditTarget = ({ target, setTarget, onClose }: EditTargetProps) => {
         return onClose()
       }
     } else {
-      setNavItems(['Basic Info', 'Tracks'])
+      const newNavItems = target.musics?.length
+        ? ['Basic Info', 'Tracks']
+        : ['Basic Info']
+      setNavItems(newNavItems)
       setMetadata(null)
     }
 
@@ -238,73 +244,72 @@ const EditTarget = ({ target, setTarget, onClose }: EditTargetProps) => {
   }, [checkChanged])
 
   return (
-    <ModalStyle.InnerModalWrapper>
-      <ModalStyle.InnerModalContainer>
-        <ModalStyle.ModalTitle>
-          <ExtractMusicNav
-            navItems={navItems}
-            navIndex={navIndex}
-            handleClickNav={setNavIndex}
-          />
-        </ModalStyle.ModalTitle>
+    <S.Container>
+      {saveLoading ? <LoadingPage /> : <></>}
 
-        <ModalStyle.ModalContent
-          style={{
-            position: 'relative',
-            overflowY: loading ? 'hidden' : 'auto',
-          }}
-        >
-          {loading && (
-            <S.LoadingBox>
-              <Loading />
-            </S.LoadingBox>
-          )}
-          {'title' in target ? (
-            <>
-              {navIndex === 0 ? (
-                <MusicBasicInfo
-                  ref={musicBasicInfoRef}
-                  metadata={metadata}
-                  onChangeData={handleChangeMusicData}
-                />
-              ) : (
-                <MusicMetadata
-                  ref={musiMetadataRef}
-                  metadata={metadata}
-                  onChangeData={handleChangeMusicData}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              <EditPlaylistData
-                playlist={target}
-                onChangeData={handleChangePlaylistData}
-                style={{ display: navIndex === 0 ? 'block' : 'none' }}
+      <S.Title>
+        <ExtractMusicNav
+          navItems={navItems}
+          navIndex={navIndex}
+          handleClickNav={setNavIndex}
+        />
+      </S.Title>
+      <S.Content
+        style={{
+          position: 'relative',
+          overflowY: loading ? 'hidden' : 'auto',
+        }}
+      >
+        {loading && (
+          <S.LoadingBox>
+            <Loading />
+          </S.LoadingBox>
+        )}
+        {'title' in target ? (
+          <>
+            {navIndex === 0 ? (
+              <MusicBasicInfo
+                ref={musicBasicInfoRef}
+                metadata={metadata}
+                onChangeData={handleChangeMusicData}
               />
-              <EditPlaylistTracks
-                playlist={target}
-                onChangeOrder={handleChangeOrder}
-                style={{ display: navIndex === 0 ? 'none' : 'block' }}
+            ) : (
+              <MusicMetadata
+                ref={musiMetadataRef}
+                metadata={metadata}
+                onChangeData={handleChangeMusicData}
               />
-            </>
-          )}
-        </ModalStyle.ModalContent>
-        <ModalStyle.ModalActions>
-          <S.Buttons>
-            <Button className="buttons-btn cancel" onClick={onClose}>
-              Cancel
-            </Button>
-            <PrimaryButton
-              className={`buttons-btn save ${!changed && 'block'}`}
-              onClick={handleClickSave}
-            >
-              Save Changes
-            </PrimaryButton>
-          </S.Buttons>
-        </ModalStyle.ModalActions>
-      </ModalStyle.InnerModalContainer>
-    </ModalStyle.InnerModalWrapper>
+            )}
+          </>
+        ) : (
+          <>
+            <EditPlaylistData
+              playlist={target}
+              onChangeData={handleChangePlaylistData}
+              style={{ display: navIndex === 0 ? 'block' : 'none' }}
+            />
+            <EditPlaylistTracks
+              playlist={target}
+              onChangeOrder={handleChangeOrder}
+              style={{ display: navIndex === 0 ? 'none' : 'block' }}
+            />
+          </>
+        )}
+      </S.Content>
+      <S.Acitons>
+        <S.Buttons>
+          <Button className="buttons-btn cancel" onClick={onClose}>
+            Cancel
+          </Button>
+          <PrimaryButton
+            className={`buttons-btn save ${!changed && 'block'}`}
+            onClick={handleClickSave}
+          >
+            Save Changes
+          </PrimaryButton>
+        </S.Buttons>
+      </S.Acitons>
+    </S.Container>
   )
 }
 

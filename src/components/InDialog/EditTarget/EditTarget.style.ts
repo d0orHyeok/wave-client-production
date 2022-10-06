@@ -1,4 +1,22 @@
 import styled from 'styled-components'
+import * as CommonStyle from '../common.style'
+
+export const Container = styled(CommonStyle.DialogContainer)`
+  width: 100%;
+  padding: 20px 0;
+`
+
+const paddingStyle = 'padding: 0 30px;'
+
+export const Content = styled(CommonStyle.DialogContent)`
+  ${paddingStyle}
+`
+export const Title = styled(CommonStyle.DialogTitle)`
+  ${paddingStyle}
+`
+export const Acitons = styled(CommonStyle.DialogActions)`
+  ${paddingStyle}
+`
 
 export const LoadingBox = styled.div`
   position: absolute;

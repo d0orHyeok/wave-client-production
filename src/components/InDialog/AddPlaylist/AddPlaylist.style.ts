@@ -1,17 +1,19 @@
-import * as ModalStyle from './../common.style'
+import * as CommonStyle from './../common.style'
 import styled from 'styled-components'
 import Button, { PrimaryButton } from '@components/Common/Button'
 
-export const Wrapper = styled(ModalStyle.InnerModalWrapper)`
-  max-width: 500px;
-`
-
-export const Container = styled(ModalStyle.InnerModalContainer)`
+export const Container = styled(CommonStyle.DialogContainer)`
   font-size: 14px;
+  padding: 20px 0;
 `
 
-export const Title = styled(ModalStyle.ModalTitle)`
+export const Title = styled(CommonStyle.DialogTitle)`
   font-size: 16px;
+  padding: 0 20px;
+`
+
+export const DialogContent = styled(CommonStyle.DialogContent)`
+  padding: 0 20px;
 `
 
 export const TitleUllist = styled.ul`
@@ -149,6 +151,12 @@ export const Label = styled.h2`
   & span {
     color: ${({ theme }) => theme.colors.errorColor};
   }
+`
+
+export const SaveBox = styled.div`
+  display: flex;
+  align-items: center;
+  height: 40px;
 `
 
 export const SaveButton = styled(PrimaryButton)`

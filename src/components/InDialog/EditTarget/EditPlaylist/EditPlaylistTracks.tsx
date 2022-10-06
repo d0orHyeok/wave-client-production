@@ -7,6 +7,11 @@ import { useDrop } from 'react-dnd'
 const Container = styled.div`
   padding: 20px 0;
   font-size: 14px;
+  width: 550px;
+
+  ${({ theme }) => theme.device.tablet} {
+    width: 400px;
+  }
 `
 
 interface EditPlaylistTracksProps {
@@ -87,22 +92,20 @@ const EditPlaylistTracks = ({ playlist, onChangeOrder, ...props }: Prosp) => {
   }, [whenChanged])
 
   return (
-    <div {...props}>
-      <Container>
-        <ul ref={drop}>
-          {cards.map((item, index) => (
-            <DndTrackCard
-              key={item.id}
-              id={item.id}
-              music={item.card}
-              moveCard={moveCard}
-              findCard={findCard}
-              onDelete={handleDelete(index)}
-            />
-          ))}
-        </ul>
-      </Container>
-    </div>
+    <Container {...props}>
+      <ul ref={drop}>
+        {cards.map((item, index) => (
+          <DndTrackCard
+            key={item.id}
+            id={item.id}
+            music={item.card}
+            moveCard={moveCard}
+            findCard={findCard}
+            onDelete={handleDelete(index)}
+          />
+        ))}
+      </ul>
+    </Container>
   )
 }
 
