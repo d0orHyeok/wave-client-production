@@ -39,7 +39,7 @@ const HomePage = () => {
       return items.map((item) => {
         const path =
           item.genre.indexOf('All music genres') !== -1 ? 'all' : item.genre
-        const subText = option === 'trend' ? 'Top 100' : 'New Release'
+        const subText = option === 'trend' ? 'Top 50' : 'New Release'
         return {
           mainText: {
             name: item.genre,
