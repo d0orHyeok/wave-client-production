@@ -1,3 +1,5 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React from 'react'
 import { Provider } from 'react-redux'
 import Router from '@routes/router'
@@ -14,6 +16,10 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
 function App() {
+  if (process.env.NODE_ENV === 'production') {
+    console.log = function no_console() {}
+    console.warn = function no_console() {}
+  }
   return (
     <Provider store={store}>
       <HelmetProvider>
