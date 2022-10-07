@@ -7,7 +7,7 @@ const Axios: AxiosInstance = axios.create({
   baseURL:
     process.env.NODE_ENV === 'development'
       ? '/'
-      : 'https://wave-nestjs.herokuapp.com/',
+      : process.env.REACT_APP_API_URL || 'https://wave-nestjs.herokuapp.com/',
   withCredentials: true,
 })
 
