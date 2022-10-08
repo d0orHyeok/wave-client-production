@@ -57,13 +57,9 @@ REACT_APP_API_URL = [YOUR_BACKEND_URI]
 
 ## **Documentation**
 
-### [**Preview**](https://github.com/d0orHyeok/wave-client-production/blob/master/docs/PREVIEW.md)
+### [**Library**](https://github.com/d0orHyeok/wave-client-production/blob/master/docs/LIBRARY.md)
 
-완성된 프로젝트를 이미지로 확인하세요.
-
-### [**Code Description**](https://github.com/d0orHyeok/wave-client-production/blob/master/docs/CODE.md)
-
-개발에 사용된 라이브러리와 몇몇 코드들에 대한 설명입니다.
+개발에 사용된 주요 라이브러리에 대한 설명
 
 ### [**API Reference**](https://github.com/d0orHyeok/wave-nestjs-server)
 
