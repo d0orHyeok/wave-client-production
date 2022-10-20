@@ -31,6 +31,7 @@ const HistoryPage = () => {
       console.error(error)
       alert('Fail to clear history.\n Please try again')
     } finally {
+      setOpen(false)
       setHistorys([])
       setPage(0)
       setLoading(false)
