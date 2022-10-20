@@ -18,7 +18,7 @@ const SearchPage = () => {
   useLayoutEffect(() => {
     const [query, searchText] = location.search.split('?')[1].split('=')
     setTab(query || '')
-    setKeyward(searchText || '')
+    setKeyward(decodeURI(searchText) || '')
   }, [location])
 
   useEffect(() => {
